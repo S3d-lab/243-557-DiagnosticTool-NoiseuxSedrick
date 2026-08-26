@@ -5,6 +5,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from sensor import Sensor
+
 
 class MainWindow(QWidget):
     """Fenêtre principale du logiciel de diagnostic."""
@@ -15,9 +17,11 @@ class MainWindow(QWidget):
         self.setWindowTitle("243-557 — DiagnosticTool")
         self.resize(360, 220)
 
+        self.sensor = Sensor("Distance", "cm", 35.0,)
+
         self.title_label = QLabel("Logiciel de diagnostic - Sedrick Noiseux")
-        self.sensor_name_label = QLabel("Capteur : Température")
-        self.sensor_value_label = QLabel("Valeur : ---")
+        self.sensor_name_label = QLabel("Capteur : Distance")
+        self.sensor_value_label = QLabel(f"Capteur : {self.sensor.name}")
         self.read_button = QPushButton("Lire le capteur")
 
         layout = QVBoxLayout()
@@ -32,4 +36,8 @@ class MainWindow(QWidget):
 
     def read_sensor(self) -> None:
         """Simule la lecture d'un capteur de température."""
-        self.sensor_value_label.setText("Valeur : 22.5 °C")
+        value = self.sensor.read()
+
+        self.sensor_value_label.setText(
+            f"Valeur : {value} {self.sensor.unit}"
+        )
