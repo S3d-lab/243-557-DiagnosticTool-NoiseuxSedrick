@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
 
 from models.sensor import Sensor
 from models.actuator import Actuator
+from controllers.system_controller import SystemController
 
 
 class MainWindow(QWidget):
@@ -24,6 +25,9 @@ class MainWindow(QWidget):
 
         self.sensor = Sensor("Distance", "cm", 35.0,)
         self.actuator = Actuator("LED")
+        self.controller = SystemController()
+
+        # sensor
 
         self.title_label = QLabel("Logiciel de diagnostic - Sedrick Noiseux")
         self.sensor_name_label = QLabel("Capteur : Distance")
@@ -40,6 +44,8 @@ class MainWindow(QWidget):
 
         sensor_group = QGroupBox("Capteur")
         sensor_group.setLayout(sensor_layout)
+
+        # actuator
 
         self.actuator_name_label = QLabel("Etat de la LED")
         self.actuator_state_label = QLabel(f"{self.actuator.read_state()}")
@@ -60,7 +66,30 @@ class MainWindow(QWidget):
         actuator_group = QGroupBox("Actionneur")
         actuator_group.setLayout(actuator_layout)
 
+        # controlleur
+
+        self.start_button = QPushButton("Demarrer")
+        self.stop_button = QPushButton("Arreter")
+        self.reset_button = QPushButton("Reinitialiser")
+        self.state_label = QLabel(f"Etat du systeme : {self.controller.read_state()}")
+
+        command_layout = QHBoxLayout()
+
+        command_layout.addWidget(self.state_label)
+        command_layout.addWidget(self.start_button)
+        command_layout.addWidget(self.stop_button)
+        command_layout.addWidget(self.reset_button)
+
+        self.start_button.clicked.connect(self.start_pressed)
+        self.stop_button.clicked.connect(self.stop_pressed)
+        self.reset_button.clicked.connect(self.reset_pressed)
+
+        command_group = QGroupBox("FSM")
+        command_group.setLayout(command_layout)
+
+        # Main Layout
         main_layout = QHBoxLayout()
+        main_layout.addWidget(command_group)
         main_layout.addWidget(sensor_group)
         main_layout.addWidget(actuator_group)
 
@@ -85,3 +114,15 @@ class MainWindow(QWidget):
             self.actuator.state_false()
 
         self.actuator_state_label.setText(f"{self.actuator.read_state()}")
+
+    def start_pressed(self) -> None:
+        self.controller.start()
+        self.state_label.setText(f"Etat du systeme : {self.controller.read_state()}")
+
+    def stop_pressed(self) -> None:
+        self.controller.stop()
+        self.state_label.setText(f"Etat du systeme : {self.controller.read_state()}")
+
+    def reset_pressed(self) -> None:
+        self.controller.reset()
+        self.state_label.setText(f"Etat du systeme : {self.controller.read_state()}")
