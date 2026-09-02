@@ -27,7 +27,7 @@ class MainWindow(QWidget):
 
         self.title_label = QLabel("Logiciel de diagnostic - Sedrick Noiseux")
         self.sensor_name_label = QLabel("Capteur : Distance")
-        self.sensor_value_label = QLabel(f"Capteur : {self.sensor.name}")
+        self.sensor_value_label = QLabel(f"Valeur : {self.sensor.read()}")
         self.read_button = QPushButton("Lire le capteur")
 
         sensor_layout = QVBoxLayout()
@@ -42,10 +42,10 @@ class MainWindow(QWidget):
         sensor_group.setLayout(sensor_layout)
 
         self.actuator_name_label = QLabel("Etat de la LED")
-        self.actuator_state_label = QLabel(f"{self.actuator.state}")
+        self.actuator_state_label = QLabel(f"{self.actuator.read_state()}")
         self.actuator_state_set = QSlider(Qt.Orientation.Horizontal)
         self.actuator_state_set.setRange(0, 1)
-        self.actuator_state_set.setValue(int(self.actuator.state))
+        self.actuator_state_set.setValue(int(self.actuator.read_state()))
         self.actuator_toggle = QPushButton("Toggle")
 
         actuator_layout = QVBoxLayout()
@@ -76,7 +76,7 @@ class MainWindow(QWidget):
 
     def toggle_actuator(self) -> None:
         self.actuator.change_state()
-        self.actuator_state_set.setValue(int(self.actuator.state))
+        self.actuator_state_set.setValue(int(self.actuator.read_state()))
 
     def slider_changed(self, value: int) -> None:
         if value == 1:
@@ -84,4 +84,4 @@ class MainWindow(QWidget):
         else:
             self.actuator.state_false()
 
-        self.actuator_state_label.setText(f"{self.actuator.state}")
+        self.actuator_state_label.setText(f"{self.actuator.read_state()}")

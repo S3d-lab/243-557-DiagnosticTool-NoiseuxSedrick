@@ -7,6 +7,9 @@ class Actuator:
         self.name = name
         self.state = state
 
+    def read_state(self) -> bool:
+         return self.state
+
     def change_state(self) -> None:
         self.state ^= True
 
