@@ -1,20 +1,24 @@
 class Actuator:
-    def __init__(
-            self,
-            name: str,
-            state: bool = False,
-    ) -> None:
+    """Représente un actionneur pouvant être actif ou inactif."""
+
+    def __init__(self, name: str, hardware) -> None:
         self.name = name
-        self.state = state
+        self.hardware = hardware
+        self.is_active = False
 
-    def read_state(self) -> bool:
-         return self.state
+    def activate(self) -> None:
+        """Active l'actionneur et transmet la commande au matériel."""
+        self.is_active = True
+        self.hardware.set_actuator(self.name, self.is_active)
 
-    def change_state(self) -> None:
-        self.state ^= True
+    def deactivate(self) -> None:
+        """Désactive l'actionneur et transmet la commande au matériel."""
+        self.is_active = False
+        self.hardware.set_actuator(self.name, self.is_active)
 
-    def state_true(self) -> None:
-        self.state = True
-
-    def state_false(self) -> None:
-            self.state = False
+    def toggle(self) -> None:
+        """Inverse l'état de l'actionneur."""
+        if self.is_active:
+            self.deactivate()
+        else:
+            self.activate()
