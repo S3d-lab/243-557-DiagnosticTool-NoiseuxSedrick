@@ -24,185 +24,179 @@ class MqttClient(QObject):
     """Gère la communication MQTT de l'application PC."""
 
 
-connected = pyqtSignal()
+    connected = pyqtSignal()
 
-disconnected = pyqtSignal()
+    disconnected = pyqtSignal()
 
-connection_failed = pyqtSignal(str)
-
-
-message_received = pyqtSignal(
-
-str,
-
-str,
-
-)
+    connection_failed = pyqtSignal(str)
 
 
-def __init__(self) -> None:
-
-    super().__init__()
+    message_received = pyqtSignal(str, str)
 
 
-    self.client = mqtt.Client(
+    def __init__(self) -> None:
 
-        mqtt.CallbackAPIVersion.VERSION2,
-
-        client_id=f"diagnostic-pc-{TEAM_ID}",
-
-    )
+        super().__init__()
 
 
-    self.client.on_connect = (
+        self.client = mqtt.Client(
+
+            mqtt.CallbackAPIVersion.VERSION2,
+
+            client_id=f"diagnostic-pc-{TEAM_ID}",
+
+        )
+
+
+        self.client.on_connect = (
     
-        self._on_connect
+            self._on_connect
 
-    )
-
-
-    self.client.on_disconnect = (
-
-        self._on_disconnect
-
-    )
+        )
 
 
-    self.client.on_message = (
+        self.client.on_disconnect = (
 
-        self._on_message
+            self._on_disconnect
 
-    )
+        )
 
 
-def connect_to_broker(self) -> None:
+        self.client.on_message = (
 
-    """Établit la connexion avec le broker."""
+            self._on_message
+
+        )
+
+
+    def connect_to_broker(self) -> None:
+
+        """Établit la connexion avec le broker."""
 
 
 # À compléter :
 
 # 1. Appeler connect().
-    self.client.connect(BROKER_IP, BROKER_PORT)
+        self.client.connect(BROKER_IP, BROKER_PORT)
 
 # 2. Démarrer la boucle réseau Paho.
-    self.client.loop_start()
+        self.client.loop_start()
 
 
-def disconnect_from_broker(self) -> None:
+    def disconnect_from_broker(self) -> None:
 
-    """Ferme la connexion MQTT."""
+        """Ferme la connexion MQTT."""
 
 
 # À compléter :
 
 # 1. Déconnecter le client.
-    self.client.disconnect()
+        self.client.disconnect()
 # 2. Arrêter la boucle réseau.
-    self.client.loop_stop()
+        self.client.loop_stop()
 
 
-def subscribe(self, topic: str) -> None:
+    def subscribe(self, topic: str) -> None:
 
-    """Abonne le client à un topic."""
-    self.client.subscribe(topic)
+        """Abonne le client à un topic."""
+        self.client.subscribe(topic)
 
-def publish(
+    def publish(
 
-self,
+    self,
 
-topic: str,
+    topic: str,
 
-payload: str,
+    payload: str,
 
-) -> None:
+    ) -> None:
 
-    """Publie un message MQTT."""
+        """Publie un message MQTT."""
 
-    self.client.publish(topic, payload)
+        self.client.publish(topic, payload)
 
-def _on_connect(
+    def _on_connect(
 
-self,
+    self,
 
-client: mqtt.Client,
+    client: mqtt.Client,
 
-userdata: object,
+    userdata: object,
 
-flags: mqtt.ConnectFlags,
+    flags: mqtt.ConnectFlags,
 
-reason_code: mqtt.ReasonCode,
+    reason_code: mqtt.ReasonCode,
 
-properties: mqtt.Properties | None,
+    properties: mqtt.Properties | None,
 
-) -> None:
+    ) -> None:
 
-    """Traite le résultat de la connexion."""
+        """Traite le résultat de la connexion."""
 
 
-    if reason_code == 0:
+        if reason_code == 0:
 
-        self.connected.emit()
+            self.connected.emit()
 
-    else:
+        else:
 
-        self.connection_failed.emit(
+            self.connection_failed.emit(
 
-            str(reason_code)
+                str(reason_code)
+
+            )
+
+
+    def _on_disconnect(
+
+    self,
+
+    client: mqtt.Client,
+
+    userdata: object,
+
+    disconnect_flags:
+
+    mqtt.DisconnectFlags,
+
+    reason_code: mqtt.ReasonCode,
+
+    properties: mqtt.Properties | None,
+
+    ) -> None:
+
+        """Traite la déconnexion."""
+
+
+        self.disconnected.emit()
+
+
+    def _on_message(
+
+    self,
+
+    client: mqtt.Client,
+
+    userdata: object,
+
+    message: mqtt.MQTTMessage,
+
+    ) -> None:
+
+        """Transmet un message reçu à l'application."""
+
+
+        payload = message.payload.decode(
+
+            "utf-8"
 
         )
 
 
-def _on_disconnect(
+        self.message_received.emit(
 
-self,
+            message.topic,
 
-client: mqtt.Client,
+            payload,
 
-userdata: object,
-
-disconnect_flags:
-
-mqtt.DisconnectFlags,
-
-reason_code: mqtt.ReasonCode,
-
-properties: mqtt.Properties | None,
-
-) -> None:
-
-    """Traite la déconnexion."""
-
-
-    self.disconnected.emit()
-
-
-def _on_message(
-
-self,
-
-client: mqtt.Client,
-
-userdata: object,
-
-message: mqtt.MQTTMessage,
-
-) -> None:
-
-    """Transmet un message reçu à l'application."""
-
-
-    payload = message.payload.decode(
-
-        "utf-8"
-
-    )
-
-
-    self.message_received.emit(
-
-        message.topic,
-
-        payload,
-
-    )
+        )   

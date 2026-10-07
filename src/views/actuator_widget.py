@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QGroupBox, QLabel, QPushButton, QVBoxLayout
 
 from src.models.actuator import Actuator
@@ -7,8 +7,11 @@ from src.models.actuator import Actuator
 class ActuatorWidget(QGroupBox):
     """Composant graphique représentant un actionneur."""
 
+    command_requested = pyqtSignal(bool)
+
     def __init__(self, actuator: Actuator) -> None:
         super().__init__("Actionneur")
+
         self.actuator = actuator
         self.name_label = QLabel(self.actuator.name)
         self.state_label = QLabel()
@@ -25,12 +28,18 @@ class ActuatorWidget(QGroupBox):
         layout.addWidget(self.state_label)
         layout.addWidget(self.toggle_button)
         self.setLayout(layout)
+
         self.toggle_button.clicked.connect(self.toggle_actuator)
         self.update_display()
 
     def toggle_actuator(self) -> None:
-        """Inverse l'état de l'actionneur et actualise l'affichage."""
-        self.actuator.toggle()
+        """Demande l'inversion de l'actionneur."""
+        requested_state = not self.actuator.is_active
+        self.command_requested.emit(requested_state)
+
+    def set_state(self, is_active: bool) -> None:
+        """Applique l'état confirmé par le système."""
+        self.actuator.is_active = is_active
         self.update_display()
 
     def update_display(self) -> None:
